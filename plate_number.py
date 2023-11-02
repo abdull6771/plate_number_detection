@@ -1,0 +1,33 @@
+import cv2
+harcascade = "model/haarcascade_russian_plate_number.xml"
+
+cap = cv2.VideoCapture(0)
+
+cap.set(3,640)
+cap.set(4,480)
+min_area = 800
+count = 0
+while True:
+    ret, frame = cap.read()
+    plate_cascade = cv2.CascadeClassifier(harcascade)
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    faces = plate_cascade.detectMultiScale(gray, 1.1, 4)
+    for (x,y,w,h) in faces:
+        area = w * h  
+
+        if area > min_area:
+            cv2.rectangle(frame,(x,y),(x+w,y+h),(0,255,0),2)
+            cv2.putText(frame,"Number Plate",(x,y-5),cv2.FONT_HERSHEY_COMPLEX_SMALL,1, (0,255,0),2)
+            img_roi = frame[y: y+h, x:x+w]
+            cv2.imshow("ROI", img_roi)
+
+
+
+    cv2.imshow("plate",frame)
+    if cv2.waitKey(1) & 0xFF == ord('s'):
+        cv2.imwrite("plates/scaned_img_" + str(count) + ".jpg", img_roi)
+        cv2.rectangle(img, (0,200), (640,300), (0,255,0), cv2.FILLED)
+        cv2.putText(img, "Plate Saved", (150, 265), cv2.FONT_HERSHEY_COMPLEX_SMALL, 2, (0, 0, 255), 2)
+        cv2.imshow("Results",img)
+        cv2.waitKey(500)
+        count += 1
